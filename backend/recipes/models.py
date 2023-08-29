@@ -1,6 +1,5 @@
 from django.core.validators import MinValueValidator
 from django.db import models
-
 from users.models import User
 
 # Ограничения полей
@@ -138,7 +137,7 @@ class RecipeIngredient(models.Model):
         on_delete=models.CASCADE,
         related_name='recipe_ingredients',
         verbose_name='ингредиент'
-        )
+    )
     amount = models.IntegerField(
         verbose_name='количество'
     )

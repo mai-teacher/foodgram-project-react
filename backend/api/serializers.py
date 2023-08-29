@@ -2,11 +2,16 @@ from django.db.models import F
 from django.shortcuts import get_object_or_404
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_extra_fields.fields import Base64ImageField
+from recipes.models import (
+    Favorite,
+    Ingredient,
+    Recipe,
+    RecipeIngredient,
+    ShoppingCart,
+    Tag,
+)
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
-
-from recipes.models import (Favorite, Ingredient, Recipe,
-                            RecipeIngredient, ShoppingCart, Tag)
 from users.models import Subscription, User
 
 
@@ -157,11 +162,11 @@ class RecipeWriteSerializer(GetIngredientsMixin, serializers.ModelSerializer):
             instance.tags.add(tag)
 
         RecipeIngredient.objects.bulk_create([
-                RecipeIngredient(
-                    recipe=instance,
-                    ingredient_id=ingredient['id'],
-                    amount=ingredient['amount'],
-                ) for ingredient in ingredients])
+            RecipeIngredient(
+                recipe=instance,
+                ingredient_id=ingredient['id'],
+                amount=ingredient['amount'],
+            ) for ingredient in ingredients])
         return instance
 
     def create(self, validated_data):

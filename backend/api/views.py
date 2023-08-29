@@ -1,21 +1,33 @@
+from api.filters import IngredientFilter, RecipeFilter
+from api.permissions import IsAdminAuthorOrReadOnly, IsAdminOrReadOnly
+from api.serializers import (
+    FavoriteSerializer,
+    IngredientSerializer,
+    RecipeReadSerializer,
+    RecipeWriteSerializer,
+    ShoppingCartSerializer,
+    ShortRecipeSerializer,
+    SubscribeSerializer,
+    SubscriptionSerializer,
+    TagSerializer,
+)
 from django.db.models import Sum
-from django_filters.rest_framework import DjangoFilterBackend
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
+from djoser.views import UserViewSet
+from recipes.models import (
+    Favorite,
+    Ingredient,
+    Recipe,
+    RecipeIngredient,
+    ShoppingCart,
+    Tag,
+)
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import SAFE_METHODS, IsAuthenticated
 from rest_framework.response import Response
-from djoser.views import UserViewSet
-
-from api.filters import IngredientFilter, RecipeFilter
-from api.permissions import IsAdminAuthorOrReadOnly, IsAdminOrReadOnly
-from api.serializers import (
-    IngredientSerializer, FavoriteSerializer, RecipeReadSerializer,
-    RecipeWriteSerializer, SubscribeSerializer, SubscriptionSerializer,
-    ShoppingCartSerializer, ShortRecipeSerializer, TagSerializer)
-from recipes.models import (Ingredient, Recipe, RecipeIngredient,
-                            ShoppingCart, Tag, Favorite)
 from users.models import Subscription, User
 
 FILE_NAME = "shopping-cart.txt"
@@ -112,10 +124,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
         )
         result = TITLE_SHOP_CART
         result += '\n'.join(
-                f'{ingredient["ingredient__name"]}'
-                f' ({ingredient["ingredient__measurement_unit"]})'
-                f' - {ingredient["total"]}'
-                for ingredient in ingredients
+            f'{ingredient["ingredient__name"]}'
+            f' ({ingredient["ingredient__measurement_unit"]})'
+            f' - {ingredient["total"]}'
+            for ingredient in ingredients
         )
         print(result)
         response = HttpResponse(result, content_type='text/plain')
