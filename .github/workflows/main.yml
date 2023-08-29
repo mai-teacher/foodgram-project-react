@@ -32,7 +32,7 @@ jobs:
     name: Push Docker image to DockerHub
     runs-on: ubuntu-latest
     needs: tests
-    # if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main'
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
@@ -55,3 +55,36 @@ jobs:
           context: ./frontend/
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/foodgram_frontend:latest
+  deploy:
+    name: Deploy image
+    runs-on: ubuntu-latest
+    needs: build_and_push_to_docker_hub
+    # if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Executing remote ssh commands to deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          script: |
+            cd foodgram
+
+  send_message:
+    name: Send message to Telegram
+    runs-on: ubuntu-latest
+    needs: deploy
+    # if: github.ref == 'refs/heads/main'
+    steps:
+    - name: Send message
+      uses: appleboy/telegram-action@master
+      with:
+        to: ${{ secrets.TELEGRAM_TO }}
+        token: ${{ secrets.TELEGRAM_TOKEN }}
+        message: |
+            ${{ github.actor }} внёс изменения: ${{ github.event.commits[0].message }}
+            Репозиторий: ${{ github.repository }}
+            Ссылка: https://github.com/${{ github.repository }}/commit/${{github.sha}}
+            Деплой успешно выполнен!
+                      👍
