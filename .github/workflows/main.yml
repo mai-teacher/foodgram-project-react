@@ -25,4 +25,5 @@ jobs:
         pip install -r ./backend/requirements.txt
     - name: Test with flake8
       run: |
+        cd backend/
         python -m flake8 .
