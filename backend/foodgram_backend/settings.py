@@ -8,12 +8,15 @@ load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+
 SECRET_KEY = os.getenv('SECRET_KEY', default='token')
 
 DEBUG = os.getenv('DEBUG', default=False)
 
-ALLOWED_HOSTS = os.getenv(
-    'ALLOWED_HOSTS', default='127.0.0.1,localhost').split(',')
+ALLOWED_HOSTS = [os.getenv('ALLOWED_HOSTS', default='*')]
+# ALLOWED_HOSTS = ['*']
+# ALLOWED_HOSTS = os.getenv(
+#     'ALLOWED_HOSTS', default='127.0.0.1,localhost').split(',')
 
 
 INSTALLED_APPS = [
@@ -63,7 +66,13 @@ TEMPLATES = [
 WSGI_APPLICATION = 'foodgram_backend.wsgi.application'
 
 
-if os.getenv('POSTGRES', False):
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
+if os.getenv('POSTGRES', default=False) is True:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',

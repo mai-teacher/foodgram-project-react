@@ -45,7 +45,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     queryset = Recipe.objects.all()
     permission_classes = (IsAdminAuthorOrReadOnly,)
-    filter_class = RecipeFilter
+    filterset_class = RecipeFilter
     filter_backends = (DjangoFilterBackend,)
 
     def perform_create(self, serializer):
