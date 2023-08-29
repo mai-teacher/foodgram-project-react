@@ -130,3 +130,17 @@ dmypy.json
 
 # .idea
 .idea
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+.history/
+
+# папки со статикой и медиа
+media/
+static/
+
+# Others
+node_modules
+
+docker-compose.yml
