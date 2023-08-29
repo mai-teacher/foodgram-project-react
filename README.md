@@ -1,7 +1,7 @@
 # Foddgram — сайт «Продуктовый помощник».
 Учебный проект Яндекс.Практикум.
 
->[![Status](https://github.com/mai-teacher/foodgram-project-react/workflows/Main%20Foodgram%20workflow/badge.svg)](https://github.com/mai-teacher/foodgram-project-react/actions/workflows/main.yml)
+[![Status](https://github.com/mai-teacher/foodgram-project-react/workflows/Main%20Foodgram%20workflow/badge.svg)](https://github.com/mai-teacher/foodgram-project-react/actions/workflows/main.yml)
 
 ## Описание проекта
 На сайте «Продуктовый помощник» пользователи могут регистрироваться, могут публиковать рецепты, подписываться на публикации других пользователей, добавлять понравившиеся рецепты в список «Избранное», а перед походом в магазин скачивать сводный список продуктов, необходимых для приготовления одного или нескольких выбранных блюд.
