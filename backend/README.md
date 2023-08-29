@@ -19,13 +19,13 @@ py -3.9 -m venv venv
 * Если у вас Linux/macOS
 
     ```
-    source env/bin/activate
+    source venv/bin/activate
     ```
 
 * Если у вас windows
 
     ```
-    source env/scripts/activate
+    source venv/scripts/activate
     ```
 
 ```
