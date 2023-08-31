@@ -71,7 +71,7 @@ jobs:
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          source: "docker-compose.production.yml"
+          source: "infra/"
           target: "foodgram"
       - name: Executing remote ssh commands to deploy
         uses: appleboy/ssh-action@master
@@ -81,7 +81,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           script: |
-            cd foodgram
+            cd foodgram/infra
             sudo docker compose -f docker-compose.production.yml pull
             # Перезапускает все контейнеры в Docker Compose
             sudo docker compose -f docker-compose.production.yml down
