@@ -96,7 +96,6 @@ jobs:
     name: Send message to Telegram
     runs-on: ubuntu-latest
     needs: deploy
-    if: github.ref == 'refs/heads/main'
     steps:
       - name: Send message
         uses: appleboy/telegram-action@master
