@@ -1,5 +1,6 @@
-# Τΰιλ .dockerignore
+# file .dockerignore
 venv
 .env
 .git
-db.sqlite3
+db.sqlite3
+.gitkeep

@@ -23,7 +23,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.ERROR(
                 f'***** Unknown file: "{filename}.csv"'))
         else:
-            with open(f'../data/{filename}.csv', encoding='utf-8') as csv_file:
+            with open(f'./data/{filename}.csv', encoding='utf-8') as csv_file:
                 csv_reader = csv.DictReader(csv_file, delimiter=',')
                 FILE_TABLES[filename].objects.bulk_create(
                     FILE_TABLES[filename](**data) for data in csv_reader)

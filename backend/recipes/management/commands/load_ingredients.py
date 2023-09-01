@@ -9,7 +9,10 @@ class Command(BaseCommand):
     help = 'load ingredients from csv'
 
     def handle(self, *args: Any, **options: Any):
-        with open('/data/ingredients.csv', encoding='utf-8') as csv_file:
+        if Ingredient.objects.exists():
+            print("Данные уже загружены!")
+            return
+        with open('./data/ingredients.csv', encoding='utf-8') as csv_file:
             csv_reader = csv.DictReader(csv_file, delimiter=',')
             Ingredient.objects.bulk_create(
                 Ingredient(**data) for data in csv_reader)
