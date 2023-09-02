@@ -211,10 +211,10 @@ class RecipeWriteSerializer(
             instance, ingredients=ingredients, tags=tags)
         return super().update(instance, validated_data)
 
-    # def to_representation(self, instance):
-    #     serializer = RecipeReadSerializer(
-    #         instance=instance, context={'request': self.context['request']})
-    #     return serializer.data
+    def to_representation(self, instance):
+        serializer = RecipeReadSerializer(
+            instance=instance, context={'request': self.context['request']})
+        return serializer.data
 
 
 class FavoriteSerializer(serializers.Serializer):
