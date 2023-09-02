@@ -47,6 +47,18 @@ class GetIsSubscribedMixin:
         return user.follower.filter(author=obj.id).exists()
 
 
+class GetFavoriteShoppingCartMixin:
+    """Миксин отображения в избранном и списке покупок."""
+
+    def get_is_favorited(self, data):
+        user = self.context['request'].user
+        return Favorite.objects.filter(user=user, recipe=data).exists()
+
+    def get_is_in_shopping_cart(self, data):
+        user = self.context['request'].user
+        return Favorite.objects.filter(user=user, recipe=data).exists()
+
+
 class GetIngredientsMixin:
     """Миксин для рецептов."""
 
@@ -103,23 +115,32 @@ class ShortRecipeSerializer(serializers.ModelSerializer):
         read_only_fields = ('id', 'name', 'image', 'cooking_time')
 
 
-class RecipeReadSerializer(GetIngredientsMixin, serializers.ModelSerializer):
+class RecipeReadSerializer(
+        GetIngredientsMixin,
+        GetFavoriteShoppingCartMixin,
+        serializers.ModelSerializer):
     """Сериализатор объектов типа Recipe. Чтение рецептов."""
 
     tags = TagSerializer(many=True)
     author = FoodgramUserSerializer()
     ingredients = serializers.SerializerMethodField()
-    is_favorited = serializers.BooleanField(default=False)
-    is_in_shopping_cart = serializers.BooleanField(default=False)
+    is_favorited = serializers.SerializerMethodField()
+    is_in_shopping_cart = serializers.SerializerMethodField()
+    # is_favorited = serializers.BooleanField(default=False)
+    # is_in_shopping_cart = serializers.BooleanField(default=False)
 
     class Meta:
         model = Recipe
         fields = '__all__'
 
 
-class RecipeWriteSerializer(GetIngredientsMixin, serializers.ModelSerializer):
+class RecipeWriteSerializer(
+        GetIngredientsMixin,
+        GetFavoriteShoppingCartMixin,
+        serializers.ModelSerializer):
     """Сериализация объектов типа Recipes. Запись рецептов."""
 
+    author = FoodgramUserSerializer(read_only=True)
     tags = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Tag.objects.all())
     ingredients = serializers.SerializerMethodField()
@@ -132,14 +153,6 @@ class RecipeWriteSerializer(GetIngredientsMixin, serializers.ModelSerializer):
         # fields = '__all__'
         exclude = ('pub_date',)
         read_only_fields = ('author',)
-
-    def get_is_favorited(self, data):
-        user = self.context['request'].user
-        return Favorite.objects.filter(user=user, recipe=data).exists()
-
-    def get_is_in_shopping_cart(self, data):
-        user = self.context['request'].user
-        return Favorite.objects.filter(user=user, recipe=data).exists()
 
     def validate(self, data):
         """Валидация ингредиентов при заполнении рецепта."""
