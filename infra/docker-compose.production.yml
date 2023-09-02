@@ -2,8 +2,6 @@ version: '3.3'
 
 volumes:
   pg_data:
-  # попробовать созадать руками volume pg_data: sudo docker volume create pg_data
-    # external: true
   static:
   media:
 

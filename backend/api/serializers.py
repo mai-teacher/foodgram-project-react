@@ -53,12 +53,10 @@ class GetFavoriteShoppingCartMixin:
     def get_is_favorited(self, data):
         user = self.context['request'].user
         return user.favorites.filter(recipe=data).exists()
-        # return Favorite.objects.filter(user=user, recipe=data).exists()
 
     def get_is_in_shopping_cart(self, data):
         user = self.context['request'].user
         return user.shopping_cart.filter(recipe=data).exists()
-        # return ShoppingCart.objects.filter(user=user, recipe=data).exists()
 
 
 class GetIngredientsMixin:
@@ -129,8 +127,6 @@ class RecipeReadSerializer(
     ingredients = serializers.SerializerMethodField()
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
-    # is_favorited = serializers.BooleanField(default=False)
-    # is_in_shopping_cart = serializers.BooleanField(default=False)
 
     class Meta:
         model = Recipe
@@ -153,7 +149,6 @@ class RecipeWriteSerializer(
 
     class Meta:
         model = Recipe
-        # fields = '__all__'
         exclude = ('pub_date',)
         read_only_fields = ('author',)
 

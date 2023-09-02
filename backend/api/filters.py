@@ -19,12 +19,6 @@ class RecipeFilter(FilterSet):
         field_name='author__id', label='Автор'
     )
     tags = filters.AllValuesMultipleFilter(field_name="tags__slug")
-    # is_in_shopping_cart = filters.BooleanFilter(
-    #     widget=BooleanWidget(), label='В списке покупок'
-    # )
-    # is_favorited = filters.BooleanFilter(
-    #     widget=BooleanWidget(), label='В избранном'
-    # )
 
     is_favorited = filters.NumberFilter(method='get_is_favorited')
     is_in_shopping_cart = filters.NumberFilter(
