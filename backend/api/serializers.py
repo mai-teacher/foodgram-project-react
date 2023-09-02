@@ -124,12 +124,22 @@ class RecipeWriteSerializer(GetIngredientsMixin, serializers.ModelSerializer):
         many=True, queryset=Tag.objects.all())
     ingredients = serializers.SerializerMethodField()
     image = Base64ImageField()
+    is_favorited = serializers.SerializerMethodField()
+    is_in_shopping_cart = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipe
         # fields = '__all__'
         exclude = ('pub_date',)
         read_only_fields = ('author',)
+
+    def get_is_favorited(self, data):
+        user = self.context['request'].user
+        return Favorite.objects.filter(user=user, recipe=data).exists()
+
+    def get_is_in_shopping_cart(self, data):
+        user = self.context['request'].user
+        return Favorite.objects.filter(user=user, recipe=data).exists()
 
     def validate(self, data):
         """Валидация ингредиентов при заполнении рецепта."""
