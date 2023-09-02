@@ -102,8 +102,7 @@ jobs:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
           message: |
-            ${{ github.workflow }} успешно выполнен!
-
+            Деплой успешно выполнен!
           # ${{ github.actor }} внёс изменения: ${{ github.event.commits[0].message }}
           # Репозиторий: ${{ github.repository }}
           # Ссылка: https://github.com/${{ github.repository }}/commit/${{github.sha}}

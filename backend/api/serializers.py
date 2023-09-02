@@ -200,12 +200,12 @@ class FavoriteSerializer(serializers.Serializer):
         request = self.context['request']
         user = request.user
         recipe = data['recipe']
-        is_favorite = user.favorites.filter(recipe=recipe).exists()
+        favorite = user.favorites.filter(recipe=recipe).exists()
 
-        if request.method == 'POST' and is_favorite:
+        if request.method == 'POST' and favorite:
             raise serializers.ValidationError(
                 'Ошибка: этот рецепт уже добавлен в избранном')
-        if request.method == 'DELETE' and not is_favorite:
+        if request.method == 'DELETE' and not favorite:
             raise serializers.ValidationError(
                 'Ошибка: этот рецепт отсутствует в избранном')
         return data
