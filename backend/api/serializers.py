@@ -56,7 +56,7 @@ class GetFavoriteShoppingCartMixin:
 
     def get_is_in_shopping_cart(self, data):
         user = self.context['request'].user
-        return Favorite.objects.filter(user=user, recipe=data).exists()
+        return ShoppingCart.objects.filter(user=user, recipe=data).exists()
 
 
 class GetIngredientsMixin:
