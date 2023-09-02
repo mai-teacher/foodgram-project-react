@@ -54,8 +54,9 @@ class IngredientViewSet(ListRetrieveViewSet):
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
-
+    """Вьюсет для отображения моделей Recipe/Favorite/Shopping_cart."""
     queryset = Recipe.objects.all()
+    serializer_class = RecipeReadSerializer
     permission_classes = (IsAdminAuthorOrReadOnly,)
     filterset_class = RecipeFilter
     filter_backends = (DjangoFilterBackend,)
