@@ -52,11 +52,13 @@ class GetFavoriteShoppingCartMixin:
 
     def get_is_favorited(self, data):
         user = self.context['request'].user
-        return Favorite.objects.filter(user=user, recipe=data).exists()
+        return user.favorites.filter(recipe=data).exists()
+        # return Favorite.objects.filter(user=user, recipe=data).exists()
 
     def get_is_in_shopping_cart(self, data):
         user = self.context['request'].user
-        return ShoppingCart.objects.filter(user=user, recipe=data).exists()
+        return user.shopping_cart.filter(recipe=data).exists()
+        # return ShoppingCart.objects.filter(user=user, recipe=data).exists()
 
 
 class GetIngredientsMixin:
@@ -209,10 +211,10 @@ class RecipeWriteSerializer(
             instance, ingredients=ingredients, tags=tags)
         return super().update(instance, validated_data)
 
-    def to_representation(self, instance):
-        serializer = RecipeReadSerializer(
-            instance=instance, context={'request': self.context['request']})
-        return serializer.data
+    # def to_representation(self, instance):
+    #     serializer = RecipeReadSerializer(
+    #         instance=instance, context={'request': self.context['request']})
+    #     return serializer.data
 
 
 class FavoriteSerializer(serializers.Serializer):
