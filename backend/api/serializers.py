@@ -123,6 +123,7 @@ class RecipeReadSerializer(
 
     tags = TagSerializer(many=True)
     author = FoodgramUserSerializer()
+    image = serializers.ReadOnlyField(source='image.url')
     ingredients = serializers.SerializerMethodField()
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
