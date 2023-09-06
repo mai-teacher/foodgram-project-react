@@ -43,46 +43,6 @@ class FoodgramUserSerializer(serializers.ModelSerializer):
                 and request.user.follower.filter(author=obj.id).exists())
 
 
-class SubscriptionSerializer(FoodgramUserSerializer):
-    """Сериализатор объектов типа Subscription. Подписки."""
-
-    recipes = serializers.SerializerMethodField()
-    # recipes_count = serializers.SerializerMethodField()
-    recipes_count = serializers.ReadOnlyField(source='author__recipes.count')
-
-    class Meta:
-        # model = User
-        fields = (
-            'email',
-            'id',
-            'username',
-            'first_name',
-            'last_name',
-            'is_subscribed',
-            'recipes',
-            'recipes_count',
-        )
-        read_only_fields = ('is_subscribed', 'recipes', 'recipes_count')
-
-    def get_recipes(self, obj):
-        """Получение рецептов автора."""
-        request = self.context.get('request')
-        limit = request.GET.get('recipes_limit')
-        queryset = obj.author.recipes.all()
-        if limit:
-            queryset = queryset[:int(limit)]
-        return ShortRecipeSerializer(queryset, many=True).data
-
-    # def get_recipes_count(self, obj):
-    #     """Получение количества рецептов автора."""
-    #     return obj.author.recipes.all().count()
-
-    def get_is_subscribed(self, obj):
-        request = self.context.get('request')
-        return (request and not request.user.is_anonymous
-                and request.user.follower.filter(author=obj.id).exists())
-
-
 class TagSerializer(serializers.ModelSerializer):
     """Сериализатор объектов типа Tag. Список тегов."""
 
@@ -131,7 +91,9 @@ class RecipeReadSerializer(serializers.ModelSerializer):
 
     tags = TagSerializer(many=True)
     author = FoodgramUserSerializer()
+    # image = serializers.ReadOnlyField()
     image = serializers.ReadOnlyField(source='image.url')
+    # image = Base64ImageField()
     ingredients = serializers.SerializerMethodField()
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
@@ -318,8 +280,6 @@ class ShoppingCartSerializer(BaseUserRecipeSerializer):
 #             raise serializers.ValidationError(
 #                 'Ошибка: этот рецепт отсутствует в списке покупок')
 #         return data
-
-
 class SubscribeSerializer(serializers.ModelSerializer):
     """Сериализатор объектов типа Subscription. Проверка подписки."""
     class Meta:
@@ -345,3 +305,24 @@ class SubscribeSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     'Ошибка: вы не подписаны')
         return data
+
+
+class SubscriptionSerializer(FoodgramUserSerializer):
+    """Сериализатор объектов типа Subscription. Подписки."""
+
+    recipes = serializers.SerializerMethodField()
+    recipes_count = serializers.ReadOnlyField(source='recipes.count')
+
+    class Meta(FoodgramUserSerializer.Meta):
+        fields = (FoodgramUserSerializer.Meta.fields
+                  + ('recipes', 'recipes_count'))
+        read_only_fields = ('is_subscribed', 'recipes', 'recipes_count')
+
+    def get_recipes(self, obj):
+        """Получение рецептов автора."""
+        queryset = Recipe.objects.filter(author=obj)
+        request = self.context.get('request')
+        limit = request.GET.get('recipes_limit')
+        if limit:
+            queryset = queryset[:int(limit)]
+        return ShortRecipeSerializer(queryset, many=True).data

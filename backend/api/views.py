@@ -183,9 +183,9 @@ class UserSubscriptionViewSet(UserViewSet):
         serializer = SubscribeSerializer(data=data,
                                          context={'request': request})
         serializer.is_valid(raise_exception=True)
-        result = Subscription.objects.create(user=user, author=author)
+        Subscription.objects.create(user=user, author=author)
         serializer = SubscriptionSerializer(
-            result, context={'request': request})
+            author, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @subscribe.mapping.delete
@@ -204,7 +204,9 @@ class UserSubscriptionViewSet(UserViewSet):
     def subscriptions(self, request):
         """Подписки."""
         user = request.user
-        queryset = user.follower.all()
+        followers = user.follower.all()
+        authors = [item.author.id for item in followers]
+        queryset = User.objects.filter(pk__in=authors)
         pages = self.paginate_queryset(queryset)
         serializer = SubscriptionSerializer(
             pages, many=True, context={'request': request})
