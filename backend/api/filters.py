@@ -1,4 +1,5 @@
 from django_filters.rest_framework import CharFilter, FilterSet, filters
+
 from recipes.models import Ingredient, Recipe
 
 
@@ -15,9 +16,6 @@ class IngredientFilter(FilterSet):
 class RecipeFilter(FilterSet):
     """Класс для фильтрации обьектов Recipe."""
 
-    author = filters.AllValuesMultipleFilter(
-        field_name='author__id', label='Автор'
-    )
     tags = filters.AllValuesMultipleFilter(field_name="tags__slug")
 
     is_favorited = filters.NumberFilter(method='get_is_favorited')

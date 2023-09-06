@@ -1,17 +1,39 @@
-# import enum
-
-from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-# Ограничения полей
-EMAIL_LIMIT = 254
-FIRST_NAME_LIMIT = 150
-LAST_NAME_LIMIT = 150
-PASSWORD_LIMIT = 150
-USERNAME_LIMIT = 150
+from foodgram_backend.constants import EMAIL_LIMIT, USER_FIELD_LIMIT
 
 
-User = get_user_model()
+class User(AbstractUser):
+    username = models.CharField(
+        unique=True,
+        max_length=USER_FIELD_LIMIT,
+        verbose_name='уникальное имя',
+        help_text='Введите уникальное имя пользователя')
+    email = models.EmailField(
+        unique=True,
+        max_length=EMAIL_LIMIT,
+        verbose_name='электронная почта',
+        help_text='Введите электронную почту пользователя')
+    first_name = models.CharField(
+        max_length=USER_FIELD_LIMIT,
+        verbose_name='имя',
+        help_text='Введите имя пользователя')
+    last_name = models.CharField(
+        max_length=USER_FIELD_LIMIT,
+        verbose_name='фамилия',
+        help_text='Введите фамилию пользователя')
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
+
+    class Meta:
+        ordering = ('username', )
+        verbose_name = 'пользователь'
+        verbose_name_plural = 'пользователи'
+
+    def __str__(self):
+        return self.username
 
 
 class Subscription(models.Model):
@@ -31,7 +53,7 @@ class Subscription(models.Model):
     class Meta:
         verbose_name = 'подписка'
         verbose_name_plural = 'подписки'
-        ordering = ('id',)
+        ordering = ('user', 'author')
         constraints = [
             models.UniqueConstraint(fields=['author', 'user'],
                                     name='unique_follow'),
@@ -40,5 +62,4 @@ class Subscription(models.Model):
         ]
 
     def __str__(self) -> str:
-        # return f'{self.user.username} -> {self.author.username}'
         return f'{self.user} -> {self.author}'
