@@ -1,5 +1,6 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models import F
+from django.forms import URLField
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 
@@ -92,8 +93,10 @@ class RecipeReadSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True)
     author = FoodgramUserSerializer()
     # image = serializers.ReadOnlyField()
-    image = serializers.ReadOnlyField(source='image.url')
+    # image = serializers.ReadOnlyField(
+    #     source='image.url', default='images/default.jpg')
     # image = Base64ImageField()
+    image = URLField()
     ingredients = serializers.SerializerMethodField()
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
