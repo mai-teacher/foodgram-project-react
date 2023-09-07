@@ -94,9 +94,9 @@ class RecipeReadSerializer(serializers.ModelSerializer):
     # image = serializers.ReadOnlyField()
     # image = serializers.ReadOnlyField(
     #     source='image.url', default='images/default.jpg')
-    image = serializers.URLField()
+    # image = serializers.URLField()
     # image = Base64ImageField(source='image.url')
-    # image = Base64ImageField(source='image.url')
+    image = Base64ImageField()
     ingredients = serializers.SerializerMethodField()
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
@@ -184,6 +184,7 @@ class RecipeWriteSerializer(
                 ingredient_id=ingredient['id'],
                 amount=ingredient['amount'],
             ) for ingredient in ingredients])
+        return instance
 
     def create(self, validated_data):
         tags = validated_data.pop('tags')

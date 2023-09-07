@@ -192,6 +192,7 @@ class UserRecipeAbstractModel(models.Model):
 
     class Meta:
         abstract = True
+        ordering = ('user', )
         default_related_name = '%(class)ss'
         constraints = [
             models.UniqueConstraint(

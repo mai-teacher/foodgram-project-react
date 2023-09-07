@@ -110,7 +110,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         detail=True, methods=['post'], permission_classes=(IsAuthenticated,))
     def shopping_cart(self, request, pk=None):
         """Добавить в список покупок."""
-        print(f'************ shopping cart:   {pk}')
         return self.add_recipe(
             model=ShoppingCart,
             model_serializer=ShoppingCartSerializer,
