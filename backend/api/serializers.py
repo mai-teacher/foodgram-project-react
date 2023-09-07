@@ -231,7 +231,7 @@ class BaseUserRecipeSerializer(serializers.ModelSerializer):
 class FavoriteSerializer(BaseUserRecipeSerializer):
     """Сериализатор объектов типа Favorite. Проверка избранного."""
 
-    class MetaBase(BaseUserRecipeSerializer.Meta):
+    class Meta(BaseUserRecipeSerializer.Meta):
         model = Favorite
         fields = '__all__'
 
