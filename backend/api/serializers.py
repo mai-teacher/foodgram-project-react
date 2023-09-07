@@ -1,6 +1,5 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models import F
-from django.forms import URLField
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 
@@ -95,8 +94,9 @@ class RecipeReadSerializer(serializers.ModelSerializer):
     # image = serializers.ReadOnlyField()
     # image = serializers.ReadOnlyField(
     #     source='image.url', default='images/default.jpg')
-    # image = Base64ImageField()
-    image = URLField()
+    image = serializers.URLField()
+    # image = Base64ImageField(source='image.url')
+    # image = Base64ImageField(source='image.url')
     ingredients = serializers.SerializerMethodField()
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
@@ -151,6 +151,7 @@ class RecipeWriteSerializer(
         if not value:
             raise serializers.ValidationError(
                 'Ошибка: отсутствует картинка.')
+        return value
 
     def validate_tags(self, value):
         """Валидация тегов при заполнении рецепта."""
