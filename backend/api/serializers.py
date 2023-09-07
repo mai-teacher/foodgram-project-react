@@ -95,8 +95,8 @@ class RecipeReadSerializer(serializers.ModelSerializer):
     # image = serializers.ReadOnlyField(
     #     source='image.url', default='images/default.jpg')
     # image = serializers.URLField()
-    # image = Base64ImageField(source='image.url')
-    image = Base64ImageField()
+    image = Base64ImageField(source='image.url')
+    # image = Base64ImageField()
     ingredients = serializers.SerializerMethodField()
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
@@ -184,7 +184,6 @@ class RecipeWriteSerializer(
                 ingredient_id=ingredient['id'],
                 amount=ingredient['amount'],
             ) for ingredient in ingredients])
-        return instance
 
     def create(self, validated_data):
         tags = validated_data.pop('tags')
@@ -199,7 +198,7 @@ class RecipeWriteSerializer(
         instance.ingredients.clear()
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredients')
-        instance = self.add_ingredients_and_tags(instance, ingredients, tags)
+        self.add_ingredients_and_tags(instance, ingredients, tags)
         return super().update(instance, validated_data)
 
     def to_representation(self, instance):
@@ -232,7 +231,7 @@ class BaseUserRecipeSerializer(serializers.ModelSerializer):
 class FavoriteSerializer(BaseUserRecipeSerializer):
     """Сериализатор объектов типа Favorite. Проверка избранного."""
 
-    class Meta:
+    class MetaBase(BaseUserRecipeSerializer.Meta):
         model = Favorite
         fields = '__all__'
 
@@ -240,7 +239,7 @@ class FavoriteSerializer(BaseUserRecipeSerializer):
 class ShoppingCartSerializer(BaseUserRecipeSerializer):
     """Сериализатор объектов типа ShoppingCart. Проверка списка покупок."""
 
-    class Meta:
+    class Meta(BaseUserRecipeSerializer.Meta):
         model = ShoppingCart
         fields = '__all__'
 
