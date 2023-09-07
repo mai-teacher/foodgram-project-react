@@ -54,7 +54,6 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 
 class RecipeViewSet(viewsets.ModelViewSet):
     """Вьюсет для отображения моделей Recipe/Favorite/Shopping_cart."""
-    # queryset = Recipe.objects.all()
     queryset = Recipe.objects.select_related('author').prefetch_related(
         'ingredients', 'tags')
     serializer_class = RecipeWriteSerializer

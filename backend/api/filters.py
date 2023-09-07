@@ -27,11 +27,13 @@ class RecipeFilter(FilterSet):
         fields = ('author', 'tags', 'is_in_shopping_cart', 'is_favorited')
 
     def get_is_favorited(self, queryset, name, value):
+        """Возвращает Избранное."""
         if self.request.user.is_authenticated and value:
             return queryset.filter(favorites__user=self.request.user)
         return queryset
 
     def get_is_in_shopping_cart(self, queryset, name, value):
+        """Возвращает Список покупок."""
         if self.request.user.is_authenticated and value:
             return queryset.filter(shoppingcarts__user=self.request.user)
         return queryset
