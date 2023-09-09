@@ -170,12 +170,16 @@ class UserSubscriptionViewSet(UserViewSet):
         user = request.user
         author = get_object_or_404(User, pk=id)
         data = {'user': user.id, 'author': author.id}
-        serializer = SubscribeSerializer(author, data=data,
+        # serializer = SubscribeSerializer(author, data=data,
+        serializer = SubscribeSerializer(data=data,
                                          context={'request': request})
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        Subscription.objects.create(user=user, author=author)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        # Subscription.objects.create(user=user, author=author)
+        # return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(
+            serializer.to_representation(serializer.instance),
+            status=status.HTTP_201_CREATED)
 
     @subscribe.mapping.delete
     def del_subscribe(self, request, id=None):

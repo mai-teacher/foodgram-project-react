@@ -85,7 +85,8 @@ class RecipeReadSerializer(serializers.ModelSerializer):
 
     tags = TagSerializer(many=True)
     author = FoodgramUserSerializer()
-    image = serializers.URLField()
+    # image = serializers.URLField()
+    image = Base64ImageField()
     ingredients = serializers.SerializerMethodField()
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
@@ -262,7 +263,8 @@ class SubscribeSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         serializer = SubscriptionSerializer(
-            instance=instance, context=self.context)
+            instance=instance.author, context=self.context)
+            # instance=instance, context=self.context)
         return serializer.data
 
 
