@@ -11,7 +11,7 @@ from recipes.models import (
 )
 
 
-class RecipeIngredientInline(admin.TabularInline):
+class RecipeIngredientInline(admin.StackedInline):
     model = RecipeIngredient
     extra = 1
     min_num = 1
@@ -19,10 +19,17 @@ class RecipeIngredientInline(admin.TabularInline):
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = ('name', 'author', 'get_favorite_count', 'get_image')
+    list_display = (
+        'name', 'author', 'get_ingredients', 'get_favorite_count', 'get_image')
     list_filter = ('author', 'name', 'tags')
-    readonly_fields = ('get_favorite_count', )
+    readonly_fields = ('get_ingredients', 'get_favorite_count', )
     inlines = [RecipeIngredientInline]
+
+    @admin.display(description='Ингредиенты')
+    def get_ingredients(self, obj):
+        recipe_ingredients = RecipeIngredient.objects.filter(recipe__id=obj.id)
+        result = [ingredient for ingredient in recipe_ingredients]
+        return result
 
     @admin.display(description='В избранном')
     def get_favorite_count(self, obj):
@@ -30,7 +37,11 @@ class RecipeAdmin(admin.ModelAdmin):
 
     @admin.display(description='Картинка')
     def get_image(self, obj):
-        return mark_safe(f'<img src={obj.image.url} width="80" height="60">')
+        if obj.image.url is not None:
+            return mark_safe(
+                f'<img src={obj.image.url} width="80" height="60">')
+        else:
+            return ''
 
 
 @admin.register(Tag)

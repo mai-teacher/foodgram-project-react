@@ -1,5 +1,6 @@
 # Foddgram — сайт «Продуктовый помощник».
 Учебный проект Яндекс.Практикум.
+https://mai.zapto.org/recipes
 
 [![Status](https://github.com/mai-teacher/foodgram-project-react/workflows/Main%20Foodgram%20workflow/badge.svg)](https://github.com/mai-teacher/foodgram-project-react/actions/workflows/main.yml)
 

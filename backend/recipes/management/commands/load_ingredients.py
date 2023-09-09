@@ -3,27 +3,31 @@ from typing import Any
 
 from django.core.management.base import BaseCommand
 
-from recipes.models import Ingredient
+from recipes.models import Ingredient, Tag
+
+FILE_TABLES = [
+    ('ingredients', Ingredient),
+    ('tags', Tag),
+]
 
 
 class Command(BaseCommand):
     help = 'load ingredients from csv'
 
     def handle(self, *args: Any, **options: Any):
-        if Ingredient.objects.exists():
-            self.stdout.write(self.style.WARNING('Данные уже загружены!'))
-            return
-        line_num = 0
-        try:
-            with open('./data/ingredients.csv', encoding='utf-8') as csv_file:
-                reader = csv.reader(csv_file, delimiter=',')
-                for row in reader:
-                    obj, status = Ingredient.objects.get_or_create(
-                        name=row[0],
-                        measurement_unit=row[1])
-                    line_num += int(status)
+        for filename, model in FILE_TABLES:
+            line_num = 0
+            try:
+                with open(f'./data/{filename}.csv',
+                          encoding='utf-8') as csv_file:
+                    reader = csv.reader(csv_file, delimiter=',')
+                    header = next(reader)
+                    for row in reader:
+                        data = {key: value for key, value in zip(header, row)}
+                        obj, status = model.objects.get_or_create(**data)
+                        line_num += int(status)
 
-        except FileNotFoundError:
-            raise Exception('Файл ingredients.csv не найден')
-        self.stdout.write(self.style.SUCCESS(
-            f'***** импортировано: {line_num} строк'))
+            except FileNotFoundError:
+                raise Exception('Файл "{filename}.csv" не найден')
+            self.stdout.write(self.style.SUCCESS(
+                f'***** Импортировано в {filename}: {line_num} строк'))

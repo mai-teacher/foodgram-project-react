@@ -1,4 +1,3 @@
-from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models import F
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
@@ -62,15 +61,10 @@ class IngredientSerializer(serializers.ModelSerializer):
 class WriteRecipeIngredientSerializer(serializers.ModelSerializer):
     """Сериализатор объектов типа RecipeIngredient на запись."""
 
-    id = serializers.IntegerField()
-    # id = serializers.PrimaryKeyRelatedField(
-    # source=?, queryset=RecipeIngredient.objects.all())
+    id = serializers.PrimaryKeyRelatedField(
+        source='ingredient', queryset=Ingredient.objects.all())
     amount = serializers.IntegerField(
-        validators=[
-            MinValueValidator(
-                MIN_AMOUNT, message='В рецепте должны быть ингредиенты'),
-            MaxValueValidator(
-                MAX_AMOUNT, message='Слишком большое количество')])
+        min_value=MIN_AMOUNT, max_value=MAX_AMOUNT)
 
     class Meta:
         model = RecipeIngredient
@@ -129,12 +123,7 @@ class RecipeWriteSerializer(
     ingredients = WriteRecipeIngredientSerializer(many=True)
     image = Base64ImageField()
     cooking_time = serializers.IntegerField(
-        validators=[
-            MinValueValidator(
-                MIN_COOKING_TIME,
-                message='Время приготовления должно быть больше 1 минуты.'),
-            MaxValueValidator(
-                MAX_COOKING_TIME, message='Слишком большое время готовки')])
+        min_value=MIN_COOKING_TIME, max_value=MAX_COOKING_TIME)
 
     class Meta:
         model = Recipe
@@ -158,13 +147,14 @@ class RecipeWriteSerializer(
                 'Ошибка: тег не должен повторяться.')
         return value
 
-    def validate_ingredients(self, value):
+    def validate(self, value):
         """Валидация ингредиентов при заполнении рецепта."""
-        if not value:
+        ingredients = value['ingredients']
+        if not ingredients:
             raise serializers.ValidationError(
                 'Ошибка: минимально должен быть 1 ингредиент.')
-        ingredients = [item['id'] for item in value]
-        if len(ingredients) != len(set(ingredients)):
+        id_ingredients = [item['ingredient'] for item in ingredients]
+        if len(id_ingredients) != len(set(id_ingredients)):
             raise serializers.ValidationError(
                 'Ошибка: ингредиент не должен повторяться.')
         return value
@@ -176,7 +166,7 @@ class RecipeWriteSerializer(
         RecipeIngredient.objects.bulk_create([
             RecipeIngredient(
                 recipe=instance,
-                ingredient_id=ingredient['id'],
+                ingredient=ingredient['ingredient'],
                 amount=ingredient['amount'],
             ) for ingredient in ingredients])
 
@@ -222,6 +212,11 @@ class BaseUserRecipeSerializer(serializers.ModelSerializer):
                 'Ошибка: этот рецепт отсутствует.')
         return data
 
+    def to_representation(self, instance):
+        serializer = ShortRecipeSerializer(
+            instance=instance, context=self.context)
+        return serializer.data
+
 
 class FavoriteSerializer(BaseUserRecipeSerializer):
     """Сериализатор объектов типа Favorite. Проверка избранного."""
@@ -238,47 +233,7 @@ class ShoppingCartSerializer(BaseUserRecipeSerializer):
         model = ShoppingCart
         fields = '__all__'
 
-# class FavoriteSerializer(serializers.ModelSerializer):
-#     """Сериализатор объектов типа Favorite. Проверка избранного."""
 
-#     class Meta:
-#         model = Favorite
-#         fields = ('user', 'recipe')
-
-#     def validate(self, data):
-#         request = self.context['request']
-#         user = request.user
-#         is_exist = user.favorites.filter(recipe=data['recipe']).exists()
-
-#         if request.method == 'POST' and is_exist:
-#             raise serializers.ValidationError(
-#                 'Ошибка: этот рецепт уже добавлен в избранном')
-#         if request.method == 'DELETE' and not is_exist:
-#             raise serializers.ValidationError(
-#                 'Ошибка: этот рецепт отсутствует в избранном')
-#         return data
-
-
-# class ShoppingCartSerializer(serializers.ModelSerializer):
-#     """Сериализатор объектов типа ShoppingCart. Проверка списка покупок."""
-
-#     class Meta:
-#         model = ShoppingCart
-#         fields = ('user', 'recipe')
-
-#     def validate(self, data):
-#         request = self.context['request']
-#         user = request.user
-#         recipe = data['recipe']
-#         is_cart = user.shoppingcarts.filter(recipe=recipe).exists()
-
-#         if request.method == 'POST' and is_cart:
-#             raise serializers.ValidationError(
-#                 'Ошибка: этот рецепт уже добавлен в список покупок')
-#         if request.method == 'DELETE' and not is_cart:
-#             raise serializers.ValidationError(
-#                 'Ошибка: этот рецепт отсутствует в списке покупок')
-#         return data
 class SubscribeSerializer(serializers.ModelSerializer):
     """Сериализатор объектов типа Subscription. Проверка подписки."""
     class Meta:
@@ -305,6 +260,11 @@ class SubscribeSerializer(serializers.ModelSerializer):
                     'Ошибка: вы не подписаны')
         return data
 
+    def to_representation(self, instance):
+        serializer = SubscriptionSerializer(
+            instance=instance, context=self.context)
+        return serializer.data
+
 
 class SubscriptionSerializer(FoodgramUserSerializer):
     """Сериализатор объектов типа Subscription. Подписки."""
@@ -319,9 +279,9 @@ class SubscriptionSerializer(FoodgramUserSerializer):
 
     def get_recipes(self, obj):
         """Получение рецептов автора."""
-        queryset = Recipe.objects.filter(author=obj)
         request = self.context.get('request')
         limit = request.GET.get('recipes_limit')
+        queryset = obj.recipes.all()
         if limit:
             queryset = queryset[:int(limit)]
         return ShortRecipeSerializer(queryset, many=True).data

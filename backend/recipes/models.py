@@ -29,8 +29,8 @@ class Tag(models.Model):
         verbose_name='цвет в HEX-коде',
         validators=[
             RegexValidator(
-                "^#([a-fA-F0-9]{6})",
-                message="Поле должно содержать HEX-код цвета.", )
+                '^#([a-fA-F0-9]{6})',
+                message='Поле должно содержать HEX-код цвета.', )
         ],
 
     )
@@ -95,7 +95,6 @@ class Recipe(models.Model):
         help_text='Введите наименование рецепта'
     )
     image = models.ImageField(
-        # null=True,
         upload_to='images/',
         verbose_name='картинка',
         help_text='Выберите файл с картинкой',
@@ -118,7 +117,10 @@ class Recipe(models.Model):
                 MIN_COOKING_TIME,
                 message='Время приготовления должно быть больше 1 минуты.'),
             MaxValueValidator(
-                MAX_COOKING_TIME, message='Слишком большое время готовки')],
+                MAX_COOKING_TIME,
+                message=('Время приготовления должно быть меньше '
+                         f'{MAX_COOKING_TIME} минут(ы).'))
+        ],
         help_text='Введите время приготовления блюда',
     )
     tags = models.ManyToManyField(
@@ -159,7 +161,9 @@ class RecipeIngredient(models.Model):
             MinValueValidator(
                 MIN_AMOUNT, message='В рецепте должны быть ингредиенты'),
             MaxValueValidator(
-                MAX_AMOUNT, message='Слишком большое количество')],
+                MAX_AMOUNT,
+                message=f'Количество должно быть менее {MAX_AMOUNT}')
+        ],
         help_text='Введите количество ингредиента'
     )
 
@@ -174,7 +178,7 @@ class RecipeIngredient(models.Model):
         ]
 
     def __str__(self):
-        return (f'{self.recipe.name}: {self.ingredient.name}-{self.amount} '
+        return (f'{self.ingredient.name} {self.amount} '
                 f'{self.ingredient.measurement_unit}')
 
 

@@ -14,7 +14,7 @@ from rest_framework.response import Response
 
 from api.filters import IngredientFilter, RecipeFilter
 from api.paginations import LimitPageNumberPagination
-from api.permissions import IsAdminAuthorOrReadOnly
+from api.permissions import IsAuthor
 from api.serializers import (
     FavoriteSerializer,
     FoodgramUserSerializer,
@@ -22,7 +22,6 @@ from api.serializers import (
     RecipeReadSerializer,
     RecipeWriteSerializer,
     ShoppingCartSerializer,
-    ShortRecipeSerializer,
     SubscribeSerializer,
     SubscriptionSerializer,
     TagSerializer,
@@ -57,7 +56,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.select_related('author').prefetch_related(
         'ingredients', 'tags')
     serializer_class = RecipeWriteSerializer
-    permission_classes = (IsAdminAuthorOrReadOnly,)
+    permission_classes = (IsAuthenticatedOrReadOnly, IsAuthor)
     filterset_class = RecipeFilter
     filter_backends = (DjangoFilterBackend,)
 
@@ -67,12 +66,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return RecipeWriteSerializer
 
     @staticmethod
-    def add_recipe(model, model_serializer, request, id):
+    def add_recipe(model_serializer, request, id):
         data = {'user': request.user.id, 'recipe': id}
         serializer = model_serializer(data=data, context={'request': request})
         serializer.is_valid(raise_exception=True)
-        model.objects.create(user=request.user, recipe_id=id)
-        serializer = ShortRecipeSerializer(id)
+        serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @staticmethod
@@ -89,7 +87,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def favorite(self, request, pk=None):
         """Добавить в избранное."""
         return self.add_recipe(
-            model=Favorite,
             model_serializer=FavoriteSerializer,
             request=request,
             id=pk
@@ -110,7 +107,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def shopping_cart(self, request, pk=None):
         """Добавить в список покупок."""
         return self.add_recipe(
-            model=ShoppingCart,
             model_serializer=ShoppingCartSerializer,
             request=request,
             id=pk
@@ -161,15 +157,11 @@ class UserSubscriptionViewSet(UserViewSet):
     pagination_class = LimitPageNumberPagination
     permission_classes = (IsAuthenticatedOrReadOnly,)
 
-    @action(
-        detail=False, methods=['get'], url_path='me', url_name='me',
-        permission_classes=(IsAuthenticated,))
-    def me(self, request, id=None):
-        """Возвращает текущему пользователю подробную информацию о себе."""
-        user_me = request.user
-        serializer = FoodgramUserSerializer(
-            user_me, context={'request': request})
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    def get_permissions(self):
+        """Получить информацию о текущем пользователе 'api/users/me/'."""
+        if self.action == 'me':
+            self.permission_classes = (IsAuthenticated,)
+        return super().get_permissions()
 
     @action(
         detail=True, methods=['post'], permission_classes=(IsAuthenticated,))
@@ -178,12 +170,11 @@ class UserSubscriptionViewSet(UserViewSet):
         user = request.user
         author = get_object_or_404(User, pk=id)
         data = {'user': user.id, 'author': author.id}
-        serializer = SubscribeSerializer(data=data,
+        serializer = SubscribeSerializer(author, data=data,
                                          context={'request': request})
         serializer.is_valid(raise_exception=True)
+        serializer.save()
         Subscription.objects.create(user=user, author=author)
-        serializer = SubscriptionSerializer(
-            author, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @subscribe.mapping.delete
@@ -198,13 +189,12 @@ class UserSubscriptionViewSet(UserViewSet):
         user.follower.filter(author=author).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=False, permission_classes=(IsAuthenticated,))
+    @action(
+        detail=False, methods=['get'], permission_classes=(IsAuthenticated,))
     def subscriptions(self, request):
         """Подписки."""
         user = request.user
-        followers = user.follower.all()
-        authors = [item.author.id for item in followers]
-        queryset = User.objects.filter(pk__in=authors)
+        queryset = User.objects.filter(following__user=user)
         pages = self.paginate_queryset(queryset)
         serializer = SubscriptionSerializer(
             pages, many=True, context={'request': request})
