@@ -1,19 +1,15 @@
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import RegexValidator
 from django.db import models
 
 from foodgram_backend.constants import EMAIL_LIMIT, USER_FIELD_LIMIT
+from users.validators import validate_me
 
 
 class User(AbstractUser):
     username = models.CharField(
         unique=True,
         max_length=USER_FIELD_LIMIT,
-        validators=[
-            RegexValidator(
-                regex='me',
-                inverse_match=True,
-                message='Пользователя нельзя называть "me".', )],
+        validators=[validate_me],
         verbose_name='уникальное имя',
         help_text='Введите уникальное имя пользователя')
     email = models.EmailField(

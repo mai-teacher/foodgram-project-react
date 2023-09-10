@@ -128,10 +128,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
         result += '\n'.join(
             f'{ingredient["ingredient__name"]}'
             f' ({ingredient["ingredient__measurement_unit"]})'
-            f' - {ingredient["total"]}'
+            f' - {ingredient["total"]};'
             for ingredient in ingredients
         )
-        return FileResponse(result, as_attachment=True, filename=FILE_NAME)
+        return FileResponse(
+            result,
+            content_type='text/plain',
+            as_attachment=True,
+            filename=FILE_NAME)
 
     @action(
         detail=False,

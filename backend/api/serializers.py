@@ -61,8 +61,7 @@ class IngredientSerializer(serializers.ModelSerializer):
 class WriteRecipeIngredientSerializer(serializers.ModelSerializer):
     """Сериализатор объектов типа RecipeIngredient на запись."""
 
-    id = serializers.PrimaryKeyRelatedField(
-        source='ingredient', queryset=Ingredient.objects.all())
+    id = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all())
     amount = serializers.IntegerField(
         min_value=MIN_AMOUNT, max_value=MAX_AMOUNT)
 
@@ -152,7 +151,7 @@ class RecipeWriteSerializer(
         if not ingredients:
             raise serializers.ValidationError(
                 'Ошибка: минимально должен быть 1 ингредиент.')
-        id_ingredients = [item['ingredient'] for item in ingredients]
+        id_ingredients = [item['id'] for item in ingredients]
         if len(id_ingredients) != len(set(id_ingredients)):
             raise serializers.ValidationError(
                 'Ошибка: ингредиент не должен повторяться.')
@@ -165,7 +164,7 @@ class RecipeWriteSerializer(
         RecipeIngredient.objects.bulk_create([
             RecipeIngredient(
                 recipe=instance,
-                ingredient=ingredient['ingredient'],
+                ingredient=ingredient['id'],
                 amount=ingredient['amount'],
             ) for ingredient in ingredients])
 
@@ -212,9 +211,8 @@ class BaseUserRecipeSerializer(serializers.ModelSerializer):
         return data
 
     def to_representation(self, instance):
-        serializer = ShortRecipeSerializer(
-            instance=instance, context=self.context)
-        return serializer.data
+        return ShortRecipeSerializer(
+            instance=instance, context=self.context).data
 
 
 class FavoriteSerializer(BaseUserRecipeSerializer):

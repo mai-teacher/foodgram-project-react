@@ -27,9 +27,7 @@ class RecipeAdmin(admin.ModelAdmin):
 
     @admin.display(description='Ингредиенты')
     def get_ingredients(self, obj):
-        recipe_ingredients = RecipeIngredient.objects.filter(recipe__id=obj.id)
-        result = [ingredient for ingredient in recipe_ingredients]
-        return result
+        return [ingredient for ingredient in obj.recipe_ingredients.all()]
 
     @admin.display(description='В избранном')
     def get_favorite_count(self, obj):
@@ -37,11 +35,7 @@ class RecipeAdmin(admin.ModelAdmin):
 
     @admin.display(description='Картинка')
     def get_image(self, obj):
-        if obj.image.url is not None:
-            return mark_safe(
-                f'<img src={obj.image.url} width="80" height="60">')
-        else:
-            return ''
+        return mark_safe(f'<img src={obj.image.url} width="80" height="60">')
 
 
 @admin.register(Tag)
